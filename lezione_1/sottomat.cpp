@@ -115,20 +115,23 @@ int solve_2(int** matrix, int r, int c) {
 	int maxSum = 0;
 	int currentSum;
 
-	// TODO: duplicare ciclo e fare partire
-	// il primo da 0 fino a 1
-	// il secondo da i a n
+	for (int k = 0; k < r; k++) {
+		for (int l = 0; l < c; l++) {
+			currentSum = sumMatrix[k][l];
+			maxSum = max(currentSum, maxSum);
+		}
+	}
 
-	for (int i = 0; i < r; i++) {
+	for (int i = 1; i < r; i++) {
 		for (int k = i; k < r; k++) {
-			for (int j = 0; j < c; j++) {
+			for (int j = 1; j < c; j++) {
 
 				bool goOn = true;
 				for (int l = j; l < c && goOn; l++) {
 					currentSum = sumMatrix[k][l]
-					- (i == 0 ? 0 : sumMatrix[i - 1][l])
-					- (j == 0 ? 0 : sumMatrix[k][j - 1])
-					+ (i != 0 && j != 0 ? sumMatrix[i - 1][j - 1] : 0);
+					- sumMatrix[i - 1][l]
+					- sumMatrix[k][j - 1]
+					+ sumMatrix[i - 1][j - 1];
 
 					if(currentSum < 0) {
 						goOn = false;
@@ -139,6 +142,28 @@ int solve_2(int** matrix, int r, int c) {
 			}
 		}
 	}
+
+
+	// for (int i = 0; i < r; i++) {
+	// 	for (int k = i; k < r; k++) {
+	// 		for (int j = 0; j < c; j++) {
+
+	// 			bool goOn = true;
+	// 			for (int l = j; l < c && goOn; l++) {
+	// 				currentSum = sumMatrix[k][l]
+	// 				- (i == 0 ? 0 : sumMatrix[i - 1][l])
+	// 				- (j == 0 ? 0 : sumMatrix[k][j - 1])
+	// 				+ (i != 0 && j != 0 ? sumMatrix[i - 1][j - 1] : 0);
+
+	// 				if(currentSum < 0) {
+	// 					goOn = false;
+	// 				} else {
+	// 					maxSum = max(currentSum, maxSum);
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	deleteMatrix(sumMatrix, r);
 
