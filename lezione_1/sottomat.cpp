@@ -1,8 +1,8 @@
 //============================================================================
 // Name        : sottomat.cpp
 // Author      : Davide Pedranz
-// Version     : 2
-// Licence : GPL v2
+// Version     : 3
+// Licence     : GPL v2
 // Description : Lab_1, Task_3: sottomatrice massima
 //============================================================================
 
@@ -94,34 +94,75 @@ int solve_1(int** matrix, int r, int c) {
 int solve_2(int** matrix, int r, int c) {
 	int** sumMatrix = alloc(r, c);
 
+	int maxSum = 0;
+	maxSum = max(matrix[0][0], maxSum);
+
 	// fill sumMatrix
+	// and remember max
 	sumMatrix[0][0] = matrix[0][0];
 	for (int i = 1; i < r; i++) {
 		sumMatrix[i][0] = matrix[i][0] + sumMatrix[i - 1][0];
+		maxSum = max(sumMatrix[i][0], maxSum);
 	}
 	for (int j = 1; j < c; j++) {
 		sumMatrix[0][j] = matrix[0][j] + sumMatrix[0][j - 1];
+		maxSum = max(sumMatrix[0][j], maxSum);
 	}
 	for (int i = 1; i < r; i++) {
 		for (int j = 1; j < c; j++) {
 			sumMatrix[i][j] = matrix[i][j] + sumMatrix[i][j - 1]
 			+ sumMatrix[i - 1][j] - sumMatrix[i - 1][j - 1];
+			maxSum = max(sumMatrix[i][j], maxSum);
 		}
 	}
 
-	// debug
-	// printMatrix(sumMatrix, r, c);
-
-	int maxSum = 0;
 	int currentSum;
 
-	for (int k = 0; k < r; k++) {
-		for (int l = 0; l < c; l++) {
-			currentSum = sumMatrix[k][l];
-			maxSum = max(currentSum, maxSum);
+	// i = 0
+	// j = 0
+	// --> max sumMatrix
+
+	// i -> 1+
+	// j -> 0+
+	for (int k = 1; k < r; k++) {
+		for (int j = 0; j < c; j++) {
+
+			bool goOn = true;
+			for (int l = j; l < c && goOn; l++) {
+				currentSum = sumMatrix[k][l]
+				- (j == 0 ? 0 : sumMatrix[k][j - 1]);
+
+				if(currentSum < 0) {
+					goOn = false;
+				} else {
+					maxSum = max(currentSum, maxSum);
+				}
+			}
 		}
 	}
 
+	// i -> 0+
+	// j -> 1+
+	for (int i = 0; i < r; i++) {
+		for (int k = i; k < r; k++) {
+
+			bool goOn = true;
+			for (int l = 1; l < c && goOn; l++) {
+				currentSum = sumMatrix[k][l]
+				- (i == 0 ? 0 : sumMatrix[i - 1][l]);
+				
+				if(currentSum < 0) {
+					goOn = false;
+				} else {
+					maxSum = max(currentSum, maxSum);
+				}
+			}
+		}
+	}
+
+
+	// i -> 1+
+	// j -> 1+
 	for (int i = 1; i < r; i++) {
 		for (int k = i; k < r; k++) {
 			for (int j = 1; j < c; j++) {
@@ -142,28 +183,6 @@ int solve_2(int** matrix, int r, int c) {
 			}
 		}
 	}
-
-
-	// for (int i = 0; i < r; i++) {
-	// 	for (int k = i; k < r; k++) {
-	// 		for (int j = 0; j < c; j++) {
-
-	// 			bool goOn = true;
-	// 			for (int l = j; l < c && goOn; l++) {
-	// 				currentSum = sumMatrix[k][l]
-	// 				- (i == 0 ? 0 : sumMatrix[i - 1][l])
-	// 				- (j == 0 ? 0 : sumMatrix[k][j - 1])
-	// 				+ (i != 0 && j != 0 ? sumMatrix[i - 1][j - 1] : 0);
-
-	// 				if(currentSum < 0) {
-	// 					goOn = false;
-	// 				} else {
-	// 					maxSum = max(currentSum, maxSum);
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
 
 	deleteMatrix(sumMatrix, r);
 
