@@ -1,7 +1,7 @@
 //============================================================================
 // Name        : sottomat.cpp
 // Author      : Davide Pedranz
-// Version     : 3
+// Version     : 4
 // Licence     : GPL v2
 // Description : Lab_1, Task_3: sottomatrice massima
 //============================================================================
@@ -12,11 +12,9 @@ using namespace std;
 
 int** alloc(int r, int c) {
 	int** matrix = new int*[r];
-
 	for (int i = 0; i < r; i++) {
 		matrix[i] = new int[c];
 	}
-
 	return matrix;
 }
 
@@ -53,30 +51,17 @@ void printMatrix(int** matrix, int r, int c) {
 
 int sum(int** matrix, int startRow, int startCol, int endRow, int endCol) {
 	int s = 0;
-
 	for (int i = startRow; i <= endRow; i++) {
 		for (int j = startCol; j <= endCol; j++) {
 			s += matrix[i][j];
 		}
 	}
-
 	return s;
-}
-
-int maxMatrix(int** matrix, int r, int c) {
-	int maxMatrix = 0;
-	for (int i = 0; i < r; i++) {
-		for (int j = 0; j < c; j++) {
-			maxMatrix = max(maxMatrix, matrix[i][j]);
-		}
-	}
-	return maxMatrix;
 }
 
 int solve_1(int** matrix, int r, int c) {
 	int maxSum = 0;
 	int currentSum;
-
 	for (int i = 0; i < r; i++) {
 		for (int j = i; j < r; j++) {
 			for (int k = 0; k < c; k++) {
@@ -87,14 +72,13 @@ int solve_1(int** matrix, int r, int c) {
 			}
 		}
 	}
-
 	return maxSum;
 }
 
 int solve_2(int** matrix, int r, int c) {
 	int** sumMatrix = alloc(r, c);
-
 	int maxSum = 0;
+
 	maxSum = max(matrix[0][0], maxSum);
 
 	// fill sumMatrix
@@ -115,23 +99,19 @@ int solve_2(int** matrix, int r, int c) {
 			maxSum = max(sumMatrix[i][j], maxSum);
 		}
 	}
-
 	int currentSum;
 
 	// i = 0
 	// j = 0
 	// --> max sumMatrix
-
 	// i -> 1+
 	// j -> 0+
 	for (int k = 1; k < r; k++) {
 		for (int j = 0; j < c; j++) {
-
 			bool goOn = true;
 			for (int l = j; l < c && goOn; l++) {
 				currentSum = sumMatrix[k][l]
 				- (j == 0 ? 0 : sumMatrix[k][j - 1]);
-
 				if(currentSum < 0) {
 					goOn = false;
 				} else {
@@ -145,12 +125,10 @@ int solve_2(int** matrix, int r, int c) {
 	// j -> 1+
 	for (int i = 0; i < r; i++) {
 		for (int k = i; k < r; k++) {
-
 			bool goOn = true;
 			for (int l = 1; l < c && goOn; l++) {
 				currentSum = sumMatrix[k][l]
 				- (i == 0 ? 0 : sumMatrix[i - 1][l]);
-				
 				if(currentSum < 0) {
 					goOn = false;
 				} else {
@@ -160,20 +138,17 @@ int solve_2(int** matrix, int r, int c) {
 		}
 	}
 
-
 	// i -> 1+
 	// j -> 1+
 	for (int i = 1; i < r; i++) {
 		for (int k = i; k < r; k++) {
 			for (int j = 1; j < c; j++) {
-
 				bool goOn = true;
 				for (int l = j; l < c && goOn; l++) {
 					currentSum = sumMatrix[k][l]
 					- sumMatrix[i - 1][l]
 					- sumMatrix[k][j - 1]
 					+ sumMatrix[i - 1][j - 1];
-
 					if(currentSum < 0) {
 						goOn = false;
 					} else {
@@ -184,6 +159,56 @@ int solve_2(int** matrix, int r, int c) {
 		}
 	}
 
+	deleteMatrix(sumMatrix, r);
+	return maxSum;
+}
+
+
+int sottoSeq(int* array, int n) {
+	int currentSum = 0;
+	int maxSum = 0;
+
+	for(int i = 0; i < n; i++) {
+		// compute max subsequence
+		currentSum = max(currentSum + array[i], 0);
+		maxSum = max(currentSum, maxSum);
+	}
+
+	return maxSum;
+}
+
+int solve_3(int** matrix, int r, int c) {
+
+	int** sumMatrix = alloc(r, c);
+
+	for(int j = 0; j < c; j++) {
+		sumMatrix[0][j] = matrix[0][j];
+		for(int i = 1; i < r; i++) {
+			sumMatrix[i][j] = sumMatrix[i-1][j] + matrix[i][j];
+		}
+	}
+
+	int maxSum = 0;
+	int currentSum;
+
+	int* array = new int[c];
+
+	// algorimo di marcoF
+	for(int i = 0; i < r; i++) {
+		for(int k = i; k < r; k++) {
+
+			// compute array
+			for(int j = 0; j < c; j++) {
+				array[j] = sumMatrix[k][j] - (i == 0 ? 0 : sumMatrix[i - 1][j]);
+			}
+
+			// search max
+			currentSum = sottoSeq(array, c);
+			maxSum = max(maxSum, currentSum);
+		}
+	}
+
+	delete[] array;
 	deleteMatrix(sumMatrix, r);
 
 	return maxSum;
@@ -204,18 +229,11 @@ int main() {
 	// read matrix
 	int** matrix = readMatrix(in, r, c);
 
-	// debug
-	// printMatrix(matrix, r, c);
-
 	int maxSum;
 
-	// v1
 	// maxSum = solve_1(matrix, r, c);
-
-	// v2
-	maxSum = solve_2(matrix, r, c);
-
-	// cout << "Somma max: " << maxSum << endl;
+	// maxSum = solve_2(matrix, r, c);
+	maxSum = solve_3(matrix, r, c);
 
 	// return output
 	out << maxSum << endl;
