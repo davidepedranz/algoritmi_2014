@@ -1,9 +1,9 @@
 //============================================================================
-// Name        : sort.cpp
+// Name        : intervalli.cpp
 // Author      : Davide Pedranz
 // Version     : 1
 // Licence     : GPL v2
-// Description : Lab_2, Task_1: intervalli
+// Description : Lab_2, Task_2: intervalli
 //============================================================================
 
 #include <fstream>
