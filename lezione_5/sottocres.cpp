@@ -6,95 +6,67 @@
 // Description : Programmazione dinamica - sottoinsieme crescente somma max
 //============================================================================
 
-#include <iostream>
 #include <fstream>
 #include <algorithm>
 using namespace std;
 
-// #define TEST
+const int VOID = -1;
 
-const int VOID = -3;
-const int INF = 999999;
+int sottocres(int i, int* a, int* D) {
 
-int next(int* a, int n, int max, int i) {
+    if (D[i] == VOID) {
+        int max = 0;
+        for (int k = 0; k < i; k++) {
+            int res = sottocres(k, a, D);
+            if (a[k] <= a[i] && res > max) {
+                max = res;
+            }
+        }
+        D[i] = max + a[i];
+    }
 
-	i++;
-	while(i < n) {
-		if(a[i] > max) {
-			return i;
-		}
-		i++;
-	}
-
-	return n;
+    return D[i];
 }
 
-int sottocres(int* a, int n, int i, int current, int _max, int** s) {
-	// cout << "sottocres" << " i=" << i << " current=" << current << " _max= " << _max << endl;
 
-	if(i >= n) {
-		return 0;
-	}
+int sottocres(int* a, int n) {
 
-	if(s[i][current] == VOID) {
+	int* D = new int[n];
+	fill(D, D+n, VOID);
 
-		// non lo prendo -> passo al prossimo elemento sensato
-		int no = sottocres(a, n, next(a, n, current, i), current, _max, s);
+    // riempio tutto l'array per la programmazione dimanica
+    // nella casella i-esesima è scritta la soluzione per 
+    // il sottoproblema ristretto ai primi i elementi
+    sottocres(n-1, a, D);
 
-		// lo prendo
-		int si = sottocres(a, n, next(a, n, a[i], i), a[i], _max, s) + a[i];
+    // il risultato è il massimo contenuto nell'array
+    int result = *max_element(D, D+n);
 
-		// cout << "calcolato per i=" << i << " si=" << si << " no=" << no << endl;
-
-		s[i][current] = max(no, si);
-	}
-
-	return s[i][current];
-}
-
-int sottocres(int* a, int n, int max) {
-	int** s = new int*[n];
-
-	for(int i = 0; i < n; i++) {
-		s[i] = new int[max+1];
-		fill(s[i], s[i]+max+1, VOID);
-	}
-
-	int result = sottocres(a, n, 0, 0, max, s);
-
-	delete[] s;
-
-	return result;
+    delete[] D;
+    return result;
 }
 
 
 int main() {
 
-	ifstream in("input.txt");
-	ofstream out("output.txt");
+   ifstream in("input.txt");
+   ofstream out("output.txt");
 
-	int n;
-	in >> n;
+   int n;
+   in >> n;
 
-	int* a = new int[n];
+   int* a = new int[n];
 
-	for(int i = 0; i < n; i++) {
-		in >> a[i];
-	}
+   for(int i = 0; i < n; i++) {
+      in >> a[i];
+  }
 
-	#ifdef TEST
-	for(int i = 0; i < n; i++) {
-		int index = next(a, n, a[i], i);
-		cout << "next of " << a[i] << " (pos " << i << ") -> " << a[index] << " (pos " << index << ")\n";
-	}
-	#endif
+  int result = sottocres(a, n);
+  out << result << endl;
 
-	int max = *max_element(a, a+n);
+  delete[] a;
+  in.close();
+  out.close();
 
-	int result = sottocres(a, n, max);
-	out << result << endl;
-
-	delete[] a;
-
-	return 0;
+  return 0;
 }
